@@ -1,0 +1,62 @@
+{
+  "name": "Cronvars Fetch",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cronvars",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d1e2f3a4-0001-0001-0001-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "cronvars"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://setradis.dyndns.org:1080/setradiscte/cron/cronvars.php?opt=fr_pre",
+        "options": {}
+      },
+      "id": "d1e2f3a4-0002-0002-0002-000000000002",
+      "name": "Fetch URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n// La respuesta puede estar en distintos campos según n8n\nconst output = item.json?.data ?? item.json?.body ?? item.json?.text ?? JSON.stringify(item.json);\nreturn [{ json: { output: String(output) } }];"
+      },
+      "id": "d1e2f3a4-0004-0004-0004-000000000004",
+      "name": "Extraer Respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ output: $json.output }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "d1e2f3a4-0003-0003-0003-000000000003",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook":            { "main": [[{ "node": "Fetch URL",         "type": "main", "index": 0 }]] },
+    "Fetch URL":          { "main": [[{ "node": "Extraer Respuesta", "type": "main", "index": 0 }]] },
+    "Extraer Respuesta":  { "main": [[{ "node": "Respond",           "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": { "templateCredsSetupCompleted": true },
+  "pinData": {}
+}
