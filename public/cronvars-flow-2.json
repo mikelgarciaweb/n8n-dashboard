@@ -1,5 +1,5 @@
 {
-  "name": "Cronvars V2 - Logic & Log",
+"name": "Cronvars V2 - Logic, Log & Clean",
   "nodes": [
     {
       "parameters": {
@@ -8,21 +8,28 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "node-webhook-v2",
+    "id": "5ba58205-0132-45cc-a9ab-a0a6cac2fccc",
       "name": "Webhook V2",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [100, 300]
+    "position": [
+        -880,
+        480
+    ],
+    "webhookId": "9be6de97-0fe1-48b3-95c6-60f4920c12c0"
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.first().json.body;\nconst rawText = typeof body === 'string' ? body : JSON.stringify(body);\n\n// Configuración de opciones (Para la V3 podemos leer de archivo)\nconst allowedOptions = ['fr_pre', 'man'];\n\n// 1. Check de comando /list\nif (rawText.includes('/list')) {\n  return { \n    action: 'respond', \n    content: { \n      mensaje: \"Opciones disponibles\", \n      opciones: allowedOptions \n    } \n  };\n}\n\n// 2. Check de formato {opt=...}\nconst match = rawText.match(/\\{opt=(.+)\\}/);\n\nif (match) {\n  const selectedOpt = match[1].trim();\n  \n  if (allowedOptions.includes(selectedOpt)) {\n    return { action: 'fetch', opt: selectedOpt };\n  } else {\n    return { \n      action: 'respond', \n      error: `La opción '${selectedOpt}' no es válida.`, \n      opciones_validas: allowedOptions \n    };\n  }\n}\n\n// 3. Error de formato por defecto\nreturn {\n  action: 'respond',\n  error: \"Formato no válido.\",\n  instrucciones: \"Usa {opt=nombre} para ejecutar o /list para ver opciones.\"\n};"
+        "jsCode": "const body = $input.first().json.body;\nconst rawText = typeof body === 'string' ? body : JSON.stringify(body);\n\nconst allowedOptions = ['fr_pre', 'man'];\n\n// 1. Comando /list\nif (rawText.includes('/list')) {\n  return { \n    action: 'respond', \n    content: { mensaje: \"Opciones disponibles\", opciones: allowedOptions } \n  };\n}\n\n// 2. Validación de formato {opt=...}\n// Usamos [^}]+ para no ser \"greedy\" y detenernos en el primer cierre de llave\nconst match = rawText.match(/\\{opt=([^}]+)\\}/);\n\nif (match) {\n  const selectedOpt = match[1].replace(/[\"']/g, '').trim();\n  \n  if (allowedOptions.includes(selectedOpt)) {\n    return { action: 'fetch', opt: selectedOpt };\n  } else {\n    return { \n      action: 'respond', \n      error: `La opción '${selectedOpt}' no es válida.`, \n      opciones_validas: allowedOptions \n    };\n  }\n}\n\nreturn {\n  action: 'respond',\n  error: \"Formato no válido.\",\n  instrucciones: \"Usa {opt=nombre} para ejecutar o /list para ver opciones.\"\n};"
       },
-      "id": "node-logic",
+    "id": "0f6bd4fc-c27a-4c9d-958f-a546c9c2a8f0",
       "name": "Router de Comandos",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [320, 300]
+    "position": [
+        -656,
+        480
+    ]
     },
     {
       "parameters": {
@@ -35,23 +42,28 @@
           ]
         }
       },
-      "id": "node-if-fetch",
+    "id": "572f21ff-1442-4d19-8a76-803bf73e6ff1",
       "name": "Es Fetch?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [540, 300]
+    "position": [
+        -432,
+        480
+    ]
     },
     {
-      "parameters": {
-        "method": "GET",
+    "parameters": {
         "url": "=http://setradis.dyndns.org:1080/setradiscte/cron/cronvars.php?opt={{ $node[\"Router de Comandos\"].json.opt }}",
         "options": {}
       },
-      "id": "node-http",
+    "id": "9be8bc97-40ba-44df-8103-8a06db7630cb",
       "name": "Ejecutar Cron",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [760, 200]
+    "position": [
+        -200,
+        380
+    ]
     },
     {
       "parameters": {
@@ -59,33 +71,57 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "node-respond-direct",
+    "id": "d755b59a-80ac-4e25-a8cc-4555ad3a3603",
       "name": "Respuesta Info",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [760, 400]
+    "position": [
+        -200,
+        580
+    ]
+},
+{
+    "parameters": {
+        "jsCode": "const item = $input.first();\nlet raw = item.json?.body ?? item.json?.data ?? item.json?.text ?? JSON.stringify(item.json);\n\n// Limpiamos el HTML (etiquetas <b>, <br>, etc.) para que el log y la respuesta sean limpios\nconst clean = String(raw).replace(/<[^>]*>?/gm, '').trim();\n\nreturn [{ json: { output: clean } }];"
+    },
+    "id": "390961a4-ba0d-4b9a-99b1-095c5c9dbf1a",
+    "name": "Limpiar Respuesta",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 2,
+    "position": [
+        20,
+        380
+    ]
     },
     {
       "parameters": {
-        "command": "=echo \"$(date '+%Y-%m-%d %H:%M:%S') - Opt: {{ $node[\"Router de Comandos\"].json.opt }} - Resp: {{ JSON.stringify($json.body).substring(0,100) }}...\" >> cron_access.log"
+        "command": "=echo \"$(date '+%Y-%m-%d %H:%M:%S') | Opt: {{ $node[\"Router de Comandos\"].json.opt }} | Output: {{ $json.output.substring(0, 150) }}...\" >> cronvars_executions.log"
       },
-      "id": "node-log",
+    "id": "log-local-exec",
       "name": "Guardar Log Local",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [980, 100]
+    "position": [
+        240,
+        300
+    ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"status\": \"executed\", \"opt\": $node[\"Router de Comandos\"].json.opt, \"output\": $json.body } }}",
-        "options": {}
+        "responseBody": "={{ { \"output\": $json.output } }}",
+        "options": {
+            "responseCode": 200
+        }
       },
-      "id": "node-respond-success",
+    "id": "8489be72-9d5e-44aa-a5fa-7dc253775ac9",
       "name": "Respond Success",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [1200, 200]
+    "typeVersion": 1.5,
+    "position": [
+        460,
+        380
+    ]
     }
   ],
   "connections": {
@@ -102,10 +138,36 @@
       ]
     },
     "Ejecutar Cron": {
-      "main": [[{ "node": "Guardar Log Local", "type": "main", "index": 0 }]]
+    "main": [
+        [
+            {
+                "node": "Limpiar Respuesta",
+                "type": "main",
+                "index": 0
+            }
+        ]
+    ]
+},
+"Limpiar Respuesta": {
+    "main": [
+        [
+            {
+                "node": "Guardar Log Local",
+                "type": "main",
+                "index": 0
+            }
+        ],
+        [
+            {
+                "node": "Respond Success",
+                "type": "main",
+                "index": 0
+            }
+        ]
+    ]
     },
     "Guardar Log Local": {
       "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
     }
   }
-}
+}   
