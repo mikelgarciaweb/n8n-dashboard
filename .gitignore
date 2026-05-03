@@ -1,3 +1,7 @@
 node_modules/
 .env
 *.log
+
+# Documentación y guías internas
+CLAUDE.md
+docs/
