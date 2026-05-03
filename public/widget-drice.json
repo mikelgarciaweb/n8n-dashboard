@@ -1,0 +1,62 @@
+{
+  "name": "Drive - List Folder Content",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "list-drive",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "drive-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "useQueryString": true,
+        "queryString": "='FOLDER_ID_AQUÍ' in parents and trashed = false",
+        "options": {
+          "fields": [
+            "files(id, name, mimeType, modifiedTime)"
+          ]
+        }
+      },
+      "id": "google-drive-node",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [320, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "TUS_CREDENCIALES_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"total\": $json.length, \"files\": $input.all().map(i => i.json) } }}",
+        "options": {}
+      },
+      "id": "respond-drive-list",
+      "name": "Respond List",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [540, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Google Drive", "type": "main", "index": 0 }]]
+    },
+    "Google Drive": {
+      "main": [[{ "node": "Respond List", "type": "main", "index": 0 }]]
+    }
+  }
+}
