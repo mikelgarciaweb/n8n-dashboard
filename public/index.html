@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>n8n Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
     </div>
     <ul class="nav-links">
       <li><a href="/" class="nav-link active">Chat</a></li>
-      <li><button class="nav-link nav-btn" id="nav-flows">Flows</button></li>
+      <li><a href="/flows" class="nav-link">Flows</a></li>
     </ul>
   </nav>
 </header>
@@ -77,16 +77,6 @@
   </div>
 </div>
 
-<!-- Flows Panel -->
-<div class="flows-overlay" id="flows-overlay"></div>
-<div class="flows-panel" id="flows-panel">
-  <div class="flows-panel-header">
-    <h2>Flows disponibles</h2>
-    <button class="flows-close" id="flows-close">✕</button>
-  </div>
-  <div class="flows-panel-body" id="flows-list"></div>
-</div>
-
-<script type="module" src="app.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

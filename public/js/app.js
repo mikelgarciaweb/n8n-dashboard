@@ -3,7 +3,6 @@ import { state } from './state.js';
 import { addWebhook, removeWebhook, validateWebhookPath } from './webhooks.js';
 import { renderWebhooks, setActiveWebhookBar, openModal, closeModal, toggleSidebar, closeSidebar, autoResize } from './ui.js';
 import { sendMessage, checkN8n } from './n8n.js';
-import { openFlowsPanel, closeFlowsPanel, loadFlows, renderFlows } from './flows.js';
 
 // --- Coordinación de acciones que afectan a varios módulos ---
 
@@ -55,19 +54,6 @@ document.querySelector('.btn-save').addEventListener('click', handleSaveWebhook)
 document.getElementById('modal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeModal();
 });
-
-// Flows panel
-document.getElementById('nav-flows').addEventListener('click', async () => {
-  const flows = await loadFlows();
-  renderFlows(flows, (name, path) => {
-    addWebhook(name, path);
-    render();
-    closeFlowsPanel();
-  });
-  openFlowsPanel();
-});
-document.getElementById('flows-close').addEventListener('click', closeFlowsPanel);
-document.getElementById('flows-overlay').addEventListener('click', closeFlowsPanel);
 
 // --- Init ---
 render();

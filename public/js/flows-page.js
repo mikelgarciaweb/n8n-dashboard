@@ -1,35 +1,21 @@
-// Módulo de gestión del panel de flows n8n.
-// onUse(name, path) es un callback inyectado desde app.js para añadir el flow al sidebar.
+import { loadFlows } from './flows.js';
+import { addWebhook } from './webhooks.js';
 
-export function openFlowsPanel()  { document.getElementById('flows-panel').classList.add('open'); document.getElementById('flows-overlay').classList.add('open'); }
-export function closeFlowsPanel() { document.getElementById('flows-panel').classList.remove('open'); document.getElementById('flows-overlay').classList.remove('open'); }
+async function init() {
+  const flows = await loadFlows();
+  const grid  = document.getElementById('flows-grid');
 
-// Llama a /api/flows y devuelve el array de flows
-export async function loadFlows() {
-  try {
-    const res = await fetch('/api/flows');
-    return await res.json();
-  } catch {
-    return [];
-  }
-}
-
-// Renderiza las tarjetas de flows en el panel
-export function renderFlows(flows, onUse) {
-  const list = document.getElementById('flows-list');
+  document.getElementById('flows-count').textContent = flows.length + ' flow' + (flows.length !== 1 ? 's' : '');
 
   if (flows.length === 0) {
-    list.innerHTML = '<div class="empty-state">No hay flows en /public/flows/</div>';
+    grid.innerHTML = '<p class="empty-state">No hay flows en /public/flows/ — añade un fichero .json para que aparezca aquí.</p>';
     return;
   }
 
-  list.innerHTML = '';
   flows.forEach(flow => {
+    const hasPath = !!flow.webhookPath;
     const card = document.createElement('div');
     card.className = 'flow-card';
-
-    const hasPath = !!flow.webhookPath;
-
     card.innerHTML = `
       <div class="flow-card-header">
         <div class="flow-info">
@@ -37,20 +23,21 @@ export function renderFlows(flows, onUse) {
           <code class="flow-path ${hasPath ? '' : 'none'}">${hasPath ? flow.webhookPath : 'sin webhook'}</code>
         </div>
         <div class="flow-actions">
-          ${hasPath ? `<button class="btn-use-flow">+ Usar</button>` : ''}
+          ${hasPath ? `<button class="btn-use-flow">+ Usar en Chat</button>` : ''}
           <button class="btn-view-json">{ }</button>
         </div>
       </div>
       <pre class="flow-json-block"></pre>`;
 
-    // Botón "Usar": añade el webhook al sidebar
+    // Añade el webhook al sidebar del chat y redirige
     if (hasPath) {
       card.querySelector('.btn-use-flow').addEventListener('click', () => {
-        onUse(flow.name, flow.webhookPath);
+        addWebhook(flow.name, flow.webhookPath);
+        window.location.href = '/';
       });
     }
 
-    // Botón "{ }": carga y muestra el JSON del flow bajo demanda
+    // Preview del JSON bajo demanda (carga solo al abrir)
     const jsonBlock = card.querySelector('.flow-json-block');
     const viewBtn   = card.querySelector('.btn-view-json');
     let loaded = false;
@@ -69,6 +56,8 @@ export function renderFlows(flows, onUse) {
       viewBtn.textContent = jsonBlock.classList.contains('visible') ? '✕' : '{ }';
     });
 
-    list.appendChild(card);
+    grid.appendChild(card);
   });
 }
+
+init();

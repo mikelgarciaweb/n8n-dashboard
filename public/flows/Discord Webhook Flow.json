@@ -1,0 +1,102 @@
+{
+  "name": "Discord Webhook Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://discord.com/api/webhooks/1500299302822613086/RKkYkCAY4jgcJsIOIFVw0MHmeVTCXU7VYcfoiuHrI3oVbsGME1_HgI_y8URfm5Oj0Iry",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $node[\"Webhook1\"].json.body.content ?? JSON.stringify($node[\"Webhook1\"].json.body) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3aa2782a-7899-49a3-974f-850c0c15884c",
+      "name": "Discord Webhook Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        560,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "discord-test",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cc705ce3-efba-4181-91f9-6955d9b65f39",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        336,
+        32
+      ],
+      "webhookId": "23541019-917e-4f3d-a6f3-3822ac87e036"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"ok\", \"discord_response\": $json, \"original_body\": $node[\"Webhook1\"].json.body } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "f33a6bc5-359e-4abc-9c06-6001a9b79286",
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        784,
+        32
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Discord Webhook Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Discord Webhook Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "57f9831c-399b-4a04-b286-560e6ca016aa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "084c8d91952b045eb0d9f2b04408daaa7df1399bc66b1729604ae85dc1d485b5"
+  },
+  "id": "KsYyheEe8ZrAUppP",
+  "tags": []
+}

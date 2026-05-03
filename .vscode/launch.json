@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "n8n Dashboard (local)",
+      "program": "${workspaceFolder}/server.js",
+      "serverReadyAction": {
+        "pattern": "corriendo en http://0\\.0\\.0\\.0:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
+    }
+  ]
+}
