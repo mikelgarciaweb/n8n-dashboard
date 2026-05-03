@@ -69,6 +69,36 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Lista los flows disponibles en public/flows/ con sus metadatos
+  if (pathname === '/api/flows' && req.method === 'GET') {
+    const flowsDir = path.join(__dirname, 'public', 'flows');
+    fs.readdir(flowsDir, (err, files) => {
+      if (err) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end('[]'); return; }
+      const jsonFiles = files.filter(f => f.endsWith('.json'));
+      if (jsonFiles.length === 0) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end('[]'); return; }
+      const results = [];
+      let pending = jsonFiles.length;
+      jsonFiles.forEach(file => {
+        fs.readFile(path.join(flowsDir, file), 'utf8', (err, content) => {
+          if (!err) {
+            try {
+              const flow = JSON.parse(content);
+              const webhookNode = (flow.nodes || []).find(n => n.type === 'n8n-nodes-base.webhook');
+              const webhookPath = webhookNode ? '/webhook/' + webhookNode.parameters.path : null;
+              results.push({ file, name: flow.name || file, webhookPath });
+            } catch { results.push({ file, name: file, webhookPath: null }); }
+          }
+          if (--pending === 0) {
+            results.sort((a, b) => a.name.localeCompare(b.name));
+            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify(results));
+          }
+        });
+      });
+    });
+    return;
+  }
+
   // Servir ficheros estáticos
   let filePath = path.join(__dirname, 'public', pathname === '/' ? 'index.html' : pathname);
   const ext = path.extname(filePath);

@@ -278,6 +278,110 @@ button.send:disabled { background: #333; cursor: not-allowed; }
 .btn-cancel { background: #2d2f3e; color: #aaa; }
 .btn-save   { background: #ff6d3b; color: #fff; }
 
+/* NAV BUTTON (comparte look con nav-link pero es <button>) */
+.nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* FLOWS PANEL */
+.flows-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 150;
+}
+.flows-overlay.open { display: block; }
+
+.flows-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(420px, 100vw);
+  background: #1a1d27;
+  border-left: 1px solid #2d2f3e;
+  display: flex;
+  flex-direction: column;
+  z-index: 151;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+.flows-panel.open { transform: translateX(0); }
+
+.flows-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #2d2f3e;
+  flex-shrink: 0;
+}
+.flows-panel-header h2 { font-size: 0.9rem; font-weight: 600; color: #fff; }
+.flows-close {
+  background: none; border: none; color: #666;
+  font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+}
+.flows-close:hover { color: #aaa; background: #22253a; }
+
+.flows-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flow-card {
+  background: #22253a;
+  border: 1px solid #2d2f3e;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.flow-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  gap: 10px;
+}
+.flow-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.flow-name { font-size: 0.9rem; font-weight: 500; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flow-path { font-size: 0.72rem; color: #ff6d3b; font-family: monospace; }
+.flow-path.none { color: #444; }
+
+.flow-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-use-flow {
+  background: #ff6d3b; color: #fff; border: none;
+  padding: 5px 12px; border-radius: 7px; font-size: 0.78rem;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.btn-use-flow:hover { background: #e85a28; }
+.btn-view-json {
+  background: #2d2f3e; color: #888; border: none;
+  padding: 5px 10px; border-radius: 7px; font-size: 0.78rem;
+  cursor: pointer; font-family: monospace;
+}
+.btn-view-json:hover { color: #e0e0e0; }
+
+.flow-json-block {
+  display: none;
+  background: #0d0f18;
+  border-top: 1px solid #2d2f3e;
+  padding: 10px 14px;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #7ec8e3;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.flow-json-block.visible { display: block; }
+
 /* MOBILE BREAKPOINT */
 @media (max-width: 600px) {
   .hamburger { display: block; }

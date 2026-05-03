@@ -18,6 +18,7 @@
     </div>
     <ul class="nav-links">
       <li><a href="/" class="nav-link active">Chat</a></li>
+      <li><button class="nav-link nav-btn" id="nav-flows">Flows</button></li>
     </ul>
   </nav>
 </header>
@@ -74,6 +75,16 @@
       <button class="btn-save">Guardar</button>
     </div>
   </div>
+</div>
+
+<!-- Flows Panel -->
+<div class="flows-overlay" id="flows-overlay"></div>
+<div class="flows-panel" id="flows-panel">
+  <div class="flows-panel-header">
+    <h2>Flows disponibles</h2>
+    <button class="flows-close" id="flows-close">✕</button>
+  </div>
+  <div class="flows-panel-body" id="flows-list"></div>
 </div>
 
 <script type="module" src="app.js"></script>
