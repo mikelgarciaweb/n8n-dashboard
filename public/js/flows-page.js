@@ -16,18 +16,24 @@ async function init() {
     const hasPath = !!flow.webhookPath;
     const card = document.createElement('div');
     card.className = 'flow-card';
+
+    // Estructura fija en HTML estático; los datos de usuario se asignan con textContent
     card.innerHTML = `
       <div class="flow-card-header">
         <div class="flow-info">
-          <span class="flow-name">${flow.name}</span>
-          <code class="flow-path ${hasPath ? '' : 'none'}">${hasPath ? flow.webhookPath : 'sin webhook'}</code>
+          <span class="flow-name"></span>
+          <code class="flow-path ${hasPath ? '' : 'none'}"></code>
         </div>
         <div class="flow-actions">
-          ${hasPath ? `<button class="btn-use-flow">+ Usar en Chat</button>` : ''}
+          ${hasPath ? '<button class="btn-use-flow">+ Usar en Chat</button>' : ''}
           <button class="btn-view-json">{ }</button>
         </div>
       </div>
       <pre class="flow-json-block"></pre>`;
+
+    // Asignación segura de datos externos
+    card.querySelector('.flow-name').textContent = flow.name;
+    card.querySelector('.flow-path').textContent = hasPath ? flow.webhookPath : 'sin webhook';
 
     // Añade el webhook al sidebar del chat y redirige
     if (hasPath) {

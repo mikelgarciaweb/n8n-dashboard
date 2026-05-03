@@ -24,12 +24,25 @@ export function renderWebhooks(onSelect, onDelete) {
   state.webhooks.forEach((w, i) => {
     const el = document.createElement('div');
     el.className = 'webhook-item' + (state.activeIndex === i ? ' active' : '');
-    el.innerHTML = `
-      <div class="name">${w.name}
-        <button class="del-btn" title="Eliminar">✕</button>
-      </div>
-      <div class="path">${w.path}</div>`;
-    el.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); onDelete(i); });
+
+    // Construcción por DOM para evitar XSS — nunca interpolar datos de usuario en innerHTML
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'name';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn';
+    delBtn.title = 'Eliminar';
+    delBtn.textContent = '✕';
+    nameDiv.appendChild(document.createTextNode(w.name));
+    nameDiv.appendChild(delBtn);
+
+    const pathDiv = document.createElement('div');
+    pathDiv.className = 'path';
+    pathDiv.textContent = w.path;
+
+    el.appendChild(nameDiv);
+    el.appendChild(pathDiv);
+
+    delBtn.addEventListener('click', (e) => { e.stopPropagation(); onDelete(i); });
     el.addEventListener('click', () => onSelect(i));
     list.appendChild(el);
   });

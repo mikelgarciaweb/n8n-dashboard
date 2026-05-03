@@ -13,7 +13,10 @@ git push
 Write-Host "==> Connecting to $SERVER..." -ForegroundColor Cyan
 Import-Module Posh-SSH
 
-$pass    = ConvertTo-SecureString "claudia12" -AsPlainText -Force
+# Lee la contraseña de la variable de entorno DEPLOY_PASS para no hardcodearla
+# Antes de ejecutar: $env:DEPLOY_PASS = "tu_contraseña"
+$rawPass = if ($env:DEPLOY_PASS) { $env:DEPLOY_PASS } else { Read-Host "Contraseña SSH para claudia@192.168.1.130" -AsSecureString | ConvertFrom-SecureString | ConvertTo-SecureString }
+$pass    = if ($rawPass -is [securestring]) { $rawPass } else { ConvertTo-SecureString $rawPass -AsPlainText -Force }
 $cred    = New-Object System.Management.Automation.PSCredential("claudia", $pass)
 $session = New-SSHSession -ComputerName "192.168.1.130" -Credential $cred -KeyFile $KEY_PATH -AcceptKey -Force
 
